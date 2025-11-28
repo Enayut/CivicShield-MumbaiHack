@@ -117,7 +117,7 @@ export default function DashboardLayout() {
         <Sidebar className="border-r border-white bg-background/30 backdrop-blur-xl">
           <SidebarHeader className="p-6">
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0,  y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
