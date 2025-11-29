@@ -25,6 +25,7 @@ import SourceGraph from "./pages/sourcegraph-page";
 import PlatformTrendsPage from "./pages/platform-trends-page";
 import AiFactcheckPage from "./pages/ai-factcheck-page";
 import CrisisModePage from "./pages/crisis-mode-page";
+import McpArchitecturePage from "./pages/mcp-architecture-page";
 import SettingsPage from "./pages/settings-page";
 import { 
   Home, 
@@ -88,6 +89,13 @@ const sidebarLinks = [
     component: CrisisModePage
   },
   { 
+    id: "mcp", 
+    label: "MCP Architecture", 
+    href: "/mcp", 
+    icon: AlertTriangle,
+    component: McpArchitecturePage
+  },
+  { 
     id: "settings", 
     label: "Settings / Profile", 
     href: "/settings", 
@@ -117,7 +125,7 @@ export default function DashboardLayout() {
         <Sidebar className="border-r border-white bg-background/30 backdrop-blur-xl">
           <SidebarHeader className="p-6">
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0,  y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
