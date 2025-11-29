@@ -25,6 +25,7 @@ import SourceGraph from "./pages/sourcegraph-page";
 import PlatformTrendsPage from "./pages/platform-trends-page";
 import AiFactcheckPage from "./pages/ai-factcheck-page";
 import CrisisModePage from "./pages/crisis-mode-page";
+import McpArchitecturePage from "./pages/mcp-architecture-page";
 import SettingsPage from "./pages/settings-page";
 import { 
   Home, 
@@ -86,6 +87,13 @@ const sidebarLinks = [
     href: "/crisis-mode", 
     icon: AlertTriangle,
     component: CrisisModePage
+  },
+  { 
+    id: "mcp", 
+    label: "MCP Architecture", 
+    href: "/mcp", 
+    icon: AlertTriangle,
+    component: McpArchitecturePage
   },
   { 
     id: "settings", 

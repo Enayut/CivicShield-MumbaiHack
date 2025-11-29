@@ -27,63 +27,55 @@ const DeepfakePage = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<DetectionResult | null>(null);
 
-  // Hardcoded detection results for demo
-  const mockResults: DetectionResult[] = [
-    {
-      id: 1,
-      filename: "political_speech_video.mp4",
-      uploadTime: "2025-01-15 14:30:22",
-      status: "suspicious",
-      confidence: 87.3,
-      type: "video",
-      details: {
-        faceSwap: 92.1,
-        lipSync: 78.5,
-        audioVisual: 89.7,
-        temporal: 85.2
-      },
-      flags: ["Facial inconsistencies detected", "Audio-visual mismatch", "Compression artifacts"]
-    },
-    {
-      id: 2,
-      filename: "candidate_interview.jpg",
-      uploadTime: "2025-01-15 13:45:11",
-      status: "authentic",
-      confidence: 95.8,
-      type: "image",
-      details: {
-        faceAnalysis: 96.2,
-        metadata: 94.1,
-        pixelAnalysis: 97.3
-      },
-      flags: []
-    },
-    {
-      id: 3,
-      filename: "rally_footage.mp4",
-      uploadTime: "2025-01-15 12:20:33",
-      status: "deepfake",
-      confidence: 96.4,
-      type: "video",
-      details: {
-        faceSwap: 97.8,
-        lipSync: 94.2,
-        audioVisual: 96.1,
-        temporal: 97.1
-      },
-      flags: ["High probability deepfake", "Face replacement detected", "Synthetic audio patterns"]
-    }
-  ];
+  
 
-  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setAnalyzing(true);
-      // Simulate analysis
-      setTimeout(() => {
+      try {
+        const formData = new FormData();
+        formData.append('video', file);
+
+        // Call Deepfake-detection-Ai server endpoint
+        const response = await fetch('http://127.0.0.1:5000/process_video', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+const data = await response.json();
+
+// Map server response to DetectionResult type
+const result: DetectionResult = {
+          id: 1,
+          filename: file.name,
+          uploadTime: new Date().toISOString(),
+          status: data.analysis_result.toLowerCase().includes('deepfake') ? 'deepfake' : 'authentic',
+          confidence: data.confidence_score || 0,
+          type: file.type.startsWith('video') ? 'video' : 'image',
+          details: {
+            faceSwap: data.face_swap || 0,
+            lipSync: data.lip_sync || 0,
+            audioVisual: data.audio_visual_sync_score || 0,
+            temporal: data.temporal_consistency || 0,
+            faceAnalysis: data.face_analysis || 0,
+            metadata: data.metadata_score || 0,
+            pixelAnalysis: data.pixel_analysis || 0,
+          },
+          flags: data.flags || [],
+        };
+
+        setResults(result);
+      } catch (error) {
+        console.error('Error analyzing file:', error);
+        alert('Error analyzing file. Please try again.');
+      } finally {
         setAnalyzing(false);
-        setResults(mockResults[0]); // Show first result for demo
-      }, 3000);
+      }
     }
   };
 
@@ -332,24 +324,24 @@ const DeepfakePage = () => {
               <p className="text-sm text-text-600 dark:text-text-400 mb-4">Latest detection results and analysis</p>
 
               <div className="space-y-2">
-                {mockResults.slice(0, 4).map((item) => (
-                  <div key={item.id} className="p-3 bg-background/40 rounded border border-border/20 hover:bg-background/60 transition-colors">
+                {results && (
+                  <div className="p-3 bg-background/40 rounded border border-border/20 hover:bg-background/60 transition-colors">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-2">
-                        {item.type === 'video' ? <FileVideo className="w-3 h-3 text-text-600 dark:text-text-400" /> : <Camera className="w-3 h-3 text-text-600 dark:text-text-400" />}
-                        <span className="text-xs text-text-900 dark:text-text-100 font-medium truncate">{item.filename.substring(0, 18)}...</span>
+                        {results.type === 'video' ? <FileVideo className="w-3 h-3 text-text-600 dark:text-text-400" /> : <Camera className="w-3 h-3 text-text-600 dark:text-text-400" />}
+                        <span className="text-xs text-text-900 dark:text-text-100 font-medium truncate">{results.filename.substring(0, 18)}...</span>
                       </div>
-                      <div className={`px-2 py-0.5 rounded text-xs flex items-center gap-1 ${getStatusColor(item.status)} ${getStatusBg(item.status)}`}>
-                        {getStatusIcon(item.status)}
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                      <div className={`px-2 py-0.5 rounded text-xs flex items-center gap-1 ${getStatusColor(results.status)} ${getStatusBg(results.status)}`}>
+                        {getStatusIcon(results.status)}
+                        {results.status.charAt(0).toUpperCase() + results.status.slice(1)}
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-text-600 dark:text-text-400">{item.uploadTime}</span>
-                      <span className="text-xs text-text-900 dark:text-text-100 font-medium">{item.confidence}%</span>
+                      <span className="text-xs text-text-600 dark:text-text-400">{results.uploadTime}</span>
+                      <span className="text-xs text-text-900 dark:text-text-100 font-medium">{results.confidence}%</span>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
